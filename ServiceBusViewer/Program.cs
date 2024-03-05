@@ -1,9 +1,18 @@
+using Microsoft.Extensions.Azure;
 using ServiceBusViewer.Pages.ServiceBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.AddAzureClients(clientsBuilder =>
+{
+    var connectionString = builder.Configuration["AzureServiceBusConnectionString"];
+    
+    clientsBuilder.AddServiceBusClient(connectionString);
+    clientsBuilder.AddServiceAdministrationBusClient(connectionString);
+});
 
 builder.Services.AddSingleton<ServiceBus>();
 

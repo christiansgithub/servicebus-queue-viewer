@@ -10,12 +10,14 @@ public record MessageInformation(long SequenceNumber, string MessageId, DateTime
 
 public class ServiceBus
 {
-    private readonly string _serviceBusConnectionString;
+    private readonly ServiceBusAdministrationClient _serviceBusAdministrationClient;
+    private readonly ServiceBusClient _serviceBusClient;
     private readonly MemoryCache _cache;
     
-    public ServiceBus(IConfiguration configuration)
+    public ServiceBus(ServiceBusAdministrationClient serviceBusAdministrationClient, ServiceBusClient serviceBusClient)
     {
-        _serviceBusConnectionString = configuration["AzureServiceBusConnectionString"] ?? throw new ArgumentException("Could not find service bus connection string");
+        _serviceBusAdministrationClient = serviceBusAdministrationClient;
+        _serviceBusClient = serviceBusClient;
         _cache = MemoryCache.Default;
     }
 
@@ -28,9 +30,7 @@ public class ServiceBus
             return cachedQueues;
         }
         
-        var client = new ServiceBusAdministrationClient(_serviceBusConnectionString);
-        
-        var allQueues = await client.GetQueuesAsync(cancellationToken)
+        var allQueues = await _serviceBusAdministrationClient.GetQueuesAsync(cancellationToken)
             .ToArrayAsync(cancellationToken);
 
         var queues = allQueues
@@ -50,8 +50,7 @@ public class ServiceBus
         
         if (queues.Any(x => x.Name == queueName))
         {
-            await using var client = new ServiceBusClient(_serviceBusConnectionString);
-            var receiver = client.CreateReceiver(queueName);
+            await using var receiver = _serviceBusClient.CreateReceiver(queueName);
 
             var messages = await receiver.PeekMessagesAsync(maxMessagesToPeek, cancellationToken: cancellationToken);
 
@@ -73,8 +72,7 @@ public class ServiceBus
         
         if (queues.Any(x => x.Name == queueName))
         {
-            await using var client = new ServiceBusClient(_serviceBusConnectionString);
-            var receiver = client.CreateReceiver(queueName);
+            await using var receiver = _serviceBusClient.CreateReceiver(queueName);
 
             var receivedMessage = await receiver.ReceiveMessageAsync(TimeSpan.FromSeconds(2), cancellationToken);
 
