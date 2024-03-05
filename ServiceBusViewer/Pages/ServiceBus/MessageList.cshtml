@@ -1,0 +1,100 @@
+﻿@page
+@model ServiceBusViewer.Pages.ServiceBus.MessageList
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title></title>
+    
+    <script>
+        function confirmAction() {
+            return confirm("Are you sure you want to receive and complete the next message?");
+        }
+    </script>
+    
+    <style>
+           .table-header {
+               display: flex;
+               font-weight: bold; /* Make the text bold */
+               border-bottom: 2px solid #ccc; /* Add a bottom border */
+           }
+           
+           /* Define styles for table rows */
+           .table-row {
+               display: flex;
+               border-bottom: 1px solid #ccc; /* Row border */
+           }
+           
+           /* Remove bottom border for the last row */
+           .table-row:last-child {
+               border-bottom: none;
+           }
+           
+           /* Define styles for table cells */
+           .table-cell {
+               flex: 1;
+               padding: 8px;
+               border-right: 1px solid #ccc; /* Cell border */
+           }
+           
+           /* Remove right border for the last cell in each row */
+           .table-row .table-cell:last-child {
+               border-right: none;
+           }
+        </style>
+</head>
+<body>
+
+@if (Model.ReceivedMessage is not null)
+{
+    <div>
+        Received and Completed message
+        <div class="table-row">
+            <div class="table-cell">@Model.ReceivedMessage.SequenceNumber</div>
+            <div class="table-cell">@Model.ReceivedMessage.MessageId</div>
+            <div class="table-cell">@Model.ReceivedMessage.EnqueuedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
+            <div class="table-cell">@Model.ReceivedMessage.DeliveryCount</div>
+            <div class="table-cell">@Model.ReceivedMessage.MessageText</div>
+        </div>
+    </div>
+}
+
+@if (Model.PeekedMessages.Length > 0)
+{
+    <div>
+        <form method="post" onsubmit="return confirmAction()">
+            <button type="submit" name="action" value="ReceiveMessage">Receive and Complete Message</button>
+        </form>
+    </div>
+}
+
+<div class="table">
+    <div class="table-header">
+        <div class="table-cell">Sequence Number</div>
+        <div class="table-cell">Message ID</div>
+        <div class="table-cell">Enqueued Time</div>
+        <div class="table-cell">Delivery Count</div>
+        <div class="table-cell">Message Text</div>
+    </div>
+    @foreach (var peekedMessage in Model.PeekedMessages)
+    {
+        <div class="table-row">
+            <div class="table-cell">@peekedMessage.SequenceNumber</div>
+            <div class="table-cell">@peekedMessage.MessageId</div>
+            <div class="table-cell">@peekedMessage.EnqueuedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
+            <div class="table-cell">@peekedMessage.DeliveryCount</div>
+            <div class="table-cell">@peekedMessage.MessageText</div>
+        </div>
+    }
+</div>
+
+<div>
+    <a asp-page="QueueList">Queue List</a>
+</div>
+</body>
+</html>

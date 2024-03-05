@@ -1,0 +1,29 @@
+﻿@page
+@model ServiceBusViewer.Pages.ServiceBus.QueueList
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<div class="table">
+    <div class="table-row table-header">
+        <div class="table-cell">Queues</div>
+    </div>
+    @foreach (var queue in Model.Queues)
+    {
+        <div class="table-row">
+            <div class="table-cell">
+                <a asp-page="MessageList" asp-route-queueName="@queue.Name">@queue.Name</a>
+            </div>
+        </div>
+    }
+</div>
+</body>
+</html>
